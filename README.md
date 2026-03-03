@@ -9,6 +9,13 @@ Bạn có app lương tại: `https://github.com/tunganh0786/luong`.
 
 > Bản này đã bỏ phụ thuộc Gemini/API key.
 
+## A0. 2 chức năng trong cùng 1 web
+
+Sau khi chạy app, bạn sẽ thấy 2 tab chức năng ngay trên giao diện:
+- **Chức năng Báo cáo**: dùng để nhập và copy báo cáo như hiện tại.
+- **Chức năng Tính lương**: nhập lương cơ bản/phụ cấp/KPI/tăng ca/khấu trừ để ra lương Gross và Net.
+
+
 ## A. Chạy app này trên máy của bạn (Reportdailyday)
 
 ### 1) Cài Node.js

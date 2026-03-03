@@ -187,6 +187,15 @@ const App: React.FC = () => {
   const [newProductName, setNewProductName] = useState('');
   const [copied, setCopied] = useState(false);
   const [isSaved, setIsSaved] = useState(true);
+  const [activeFeature, setActiveFeature] = useState<'report' | 'salary'>('report');
+
+  const [salaryBase, setSalaryBase] = useState('0');
+  const [salaryAllowance, setSalaryAllowance] = useState('0');
+  const [salaryKpiBonus, setSalaryKpiBonus] = useState('0');
+  const [salaryOvertimeHours, setSalaryOvertimeHours] = useState('0');
+  const [salaryOvertimeRate, setSalaryOvertimeRate] = useState('50000');
+  const [salaryInsurance, setSalaryInsurance] = useState('0');
+  const [salaryAdvance, setSalaryAdvance] = useState('0');
 
   // Auto-save: Lưu mỗi khi report thay đổi
   useEffect(() => {
@@ -377,6 +386,17 @@ const App: React.FC = () => {
     } catch (err) { alert('Không thể copy.'); }
   };
 
+  const baseSalary = evaluateExpression(salaryBase);
+  const allowanceSalary = evaluateExpression(salaryAllowance);
+  const kpiSalary = evaluateExpression(salaryKpiBonus);
+  const overtimeHours = evaluateExpression(salaryOvertimeHours);
+  const overtimeRate = evaluateExpression(salaryOvertimeRate);
+  const insuranceDeduction = evaluateExpression(salaryInsurance);
+  const advanceDeduction = evaluateExpression(salaryAdvance);
+
+  const grossSalary = baseSalary + allowanceSalary + kpiSalary + overtimeHours * overtimeRate;
+  const netSalary = grossSalary - insuranceDeduction - advanceDeduction;
+
   return (
     <div className="min-h-screen p-4 md:p-8 max-w-7xl mx-auto selection:bg-blue-500/30">
       <header className="flex flex-col md:flex-row justify-between items-start md:items-center mb-8 gap-4 border-b border-slate-800 pb-6">
@@ -404,6 +424,22 @@ const App: React.FC = () => {
         </div>
       </header>
 
+      <div className="mb-6 inline-flex bg-slate-900 border border-slate-800 rounded-2xl p-1">
+        <button
+          onClick={() => setActiveFeature('report')}
+          className={`px-4 py-2 text-sm font-bold rounded-xl transition-all ${activeFeature === 'report' ? 'bg-blue-600 text-white' : 'text-slate-400 hover:text-white'}`}
+        >
+          Chức năng Báo cáo
+        </button>
+        <button
+          onClick={() => setActiveFeature('salary')}
+          className={`px-4 py-2 text-sm font-bold rounded-xl transition-all ${activeFeature === 'salary' ? 'bg-blue-600 text-white' : 'text-slate-400 hover:text-white'}`}
+        >
+          Chức năng Tính lương
+        </button>
+      </div>
+
+      {activeFeature === 'report' ? (
       <div className="grid grid-cols-1 xl:grid-cols-12 gap-8">
         <div className="xl:col-span-7 space-y-6">
           {/* Thông tin chung */}
@@ -789,6 +825,54 @@ const App: React.FC = () => {
           </div>
         </div>
       </div>
+      ) : (
+        <section className="max-w-4xl bg-slate-900/50 border border-slate-800 rounded-3xl p-6 md:p-8">
+          <h2 className="text-xl md:text-2xl font-black text-white mb-2 flex items-center gap-2">
+            <CalcIcon className="w-6 h-6 text-blue-500" /> Bộ tính lương
+          </h2>
+          <p className="text-sm text-slate-400 mb-6">
+            Bạn đã gộp 2 app vào cùng 1 web: tab này dùng để tính lương nhanh theo công thức nội bộ.
+          </p>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            {[
+              ['Lương cơ bản', salaryBase, setSalaryBase],
+              ['Phụ cấp', salaryAllowance, setSalaryAllowance],
+              ['Thưởng KPI', salaryKpiBonus, setSalaryKpiBonus],
+              ['Giờ tăng ca', salaryOvertimeHours, setSalaryOvertimeHours],
+              ['Đơn giá tăng ca / giờ', salaryOvertimeRate, setSalaryOvertimeRate],
+              ['Khấu trừ bảo hiểm', salaryInsurance, setSalaryInsurance],
+              ['Tạm ứng', salaryAdvance, setSalaryAdvance],
+            ].map(([label, val, setter]) => (
+              <label key={label as string} className="space-y-1.5">
+                <span className="text-xs font-semibold text-slate-400">{label as string}</span>
+                <input
+                  type="text"
+                  value={val as string}
+                  onChange={(e) => (setter as React.Dispatch<React.SetStateAction<string>>)(e.target.value)}
+                  placeholder="Có thể nhập 10000000+500000"
+                  className="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-2.5 focus:ring-2 focus:ring-blue-500 outline-none"
+                />
+              </label>
+            ))}
+          </div>
+
+          <div className="mt-6 grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="bg-slate-950 border border-slate-800 rounded-2xl p-4">
+              <div className="text-xs uppercase tracking-wider text-slate-500 mb-1">Lương Gross</div>
+              <div className="text-2xl font-black text-blue-400">{Math.round(grossSalary).toLocaleString('vi-VN')} đ</div>
+            </div>
+            <div className="bg-emerald-500/10 border border-emerald-500/20 rounded-2xl p-4">
+              <div className="text-xs uppercase tracking-wider text-emerald-400/80 mb-1">Lương Net</div>
+              <div className="text-2xl font-black text-emerald-400">{Math.max(0, Math.round(netSalary)).toLocaleString('vi-VN')} đ</div>
+            </div>
+          </div>
+
+          <div className="mt-4 text-xs text-slate-500">
+            Công thức: Net = (Lương cơ bản + Phụ cấp + Thưởng KPI + Giờ tăng ca × Đơn giá tăng ca) - Bảo hiểm - Tạm ứng
+          </div>
+        </section>
+      )}
     </div>
   );
 };
