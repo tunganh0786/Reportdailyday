@@ -2,80 +2,130 @@
 <img width="1200" height="475" alt="GHBanner" src="https://github.com/user-attachments/assets/0aa67016-6eaf-458a-adb2-6e31a0763ed6" />
 </div>
 
-# QuickReport - Hướng dẫn chạy và deploy online
+# QuickReport - Hướng dẫn chạy app và deploy online
 
-Repo hiện tại là app báo cáo (Report app). Bạn có thêm app lương tại:
-- `https://github.com/tunganh0786/luong`
+Repo hiện tại là app báo cáo (Report app).  
+Bạn có app lương tại: `https://github.com/tunganh0786/luong`.
 
-Tài liệu này đã được chỉnh để **không phụ thuộc Gemini/API key**.
+> Bản này đã bỏ phụ thuộc Gemini/API key.
 
-## 1) Chạy local (Report app)
+## A. Chạy app này trên máy của bạn (Reportdailyday)
 
-**Yêu cầu:** Node.js 18+
+### 1) Cài Node.js
+- Cài Node.js bản **18+** (khuyên dùng Node 20 LTS).
+- Kiểm tra sau khi cài:
 
 ```bash
+node -v
+npm -v
+```
+
+### 2) Tải code và cài thư viện
+
+```bash
+git clone https://github.com/tunganh0786/Reportdailyday.git
+cd Reportdailyday
 npm install
+```
+
+### 3) Chạy app local
+
+```bash
 npm run dev
 ```
 
-Mặc định app chạy ở `http://localhost:3000`.
+- Mở trình duyệt vào: `http://localhost:3000`
+- Nếu cổng 3000 đang bận, Vite có thể tự đổi sang cổng khác (xem trong terminal).
 
-## 2) Build production (Report app)
+### 4) Build bản production
 
 ```bash
 npm run build
 ```
 
-Kết quả build nằm ở thư mục `dist/`.
+- File build nằm trong thư mục `dist/`.
+
+### 5) Xem thử bản production trên local
+
+```bash
+npm run preview
+```
 
 ---
 
-## 3) Deploy online cho cả 2 app
+## B. Chạy app lương (repo `luong`)
 
-### Cách tối ưu, dễ quản lý nhất: tách 2 project + 2 subdomain
+Thực hiện tương tự trong repo app lương:
 
-- Report app (repo hiện tại): `report.tenmiencuaban.com`
-- Luong app (`tunganh0786/luong`): `luong.tenmiencuaban.com`
+```bash
+git clone https://github.com/tunganh0786/luong.git
+cd luong
+npm install
+npm run dev
+```
 
-Lợi ích:
-- Deploy độc lập, app nào lỗi rollback app đó.
-- Cấu hình env riêng (nếu sau này cần) không bị lẫn.
-- Dễ theo dõi log, hiệu năng và lỗi theo từng app.
+- Sau đó mở URL hiển thị trong terminal (thường là `http://localhost:5173` hoặc cổng khác).
 
-### Triển khai nhanh bằng Vercel
+---
 
-1. Push mỗi app lên GitHub (mỗi app một repo).
-2. Vào Vercel, import 2 repo thành 2 project.
-3. Build settings cho mỗi project (Vite):
+## C. Deploy online cho cả 2 app (khuyến nghị)
+
+### Cách tối ưu: tách 2 project + 2 subdomain
+
+- Report app: `report.tenmiencuaban.com`
+- Luong app: `luong.tenmiencuaban.com`
+
+Ưu điểm:
+- Mỗi app deploy độc lập.
+- App nào lỗi rollback app đó.
+- Quản lý domain/log rõ ràng.
+
+### Triển khai bằng Vercel
+
+1. Push cả 2 repo lên GitHub.
+2. Import 2 repo vào Vercel thành 2 project.
+3. Build settings (cho cả 2 app Vite):
    - Build command: `npm run build`
    - Output directory: `dist`
 4. Gắn domain:
    - Project Report -> `report.tenmiencuaban.com`
    - Project Luong -> `luong.tenmiencuaban.com`
-5. Cập nhật DNS theo hướng dẫn của Vercel.
+5. Cập nhật DNS theo hướng dẫn Vercel.
 
-### Triển khai bằng Netlify (tương tự)
+### Triển khai bằng Netlify
 
 - Build command: `npm run build`
 - Publish directory: `dist`
-- Mỗi app một site riêng, sau đó map domain/subdomain tương ứng.
+- Mỗi app một site riêng, rồi map domain/subdomain tương ứng.
 
 ---
 
-## 4) Nếu muốn dùng chung 1 domain
+## D. Lỗi thường gặp khi chạy app
 
-Bạn có thể route theo path:
-- `tenmiencuaban.com/report`
-- `tenmiencuaban.com/luong`
+### 1) `npm` hoặc `node` không nhận lệnh
+- Mở lại terminal sau khi cài Node.js.
+- Kiểm tra lại `node -v` và `npm -v`.
 
-Cách này cần reverse proxy/rules (Nginx hoặc Cloudflare) nên cấu hình phức tạp hơn subdomain.
+### 2) Lỗi cài thư viện
+
+```bash
+rm -rf node_modules package-lock.json
+npm install
+```
+
+### 3) Cổng bị trùng
+- Dừng app đang chạy cổng đó hoặc chạy lại `npm run dev` để Vite tự đổi cổng.
+
+### 4) Mở URL nhưng trắng trang
+- Xem log terminal khi chạy `npm run dev`.
+- Mở DevTools (F12) kiểm tra tab Console để xem lỗi runtime.
 
 ---
 
-## 5) Checklist tối ưu trước khi public
+## E. Checklist trước khi public
 
 - [ ] `npm run build` pass
-- [ ] Kiểm tra responsive trên mobile
-- [ ] Kiểm tra localStorage hoạt động sau khi reload
-- [ ] Gắn domain + SSL thành công
-- [ ] Bật analytics/log theo dõi lỗi runtime
+- [ ] Test mobile + desktop
+- [ ] Reload nhiều lần để kiểm tra localStorage
+- [ ] Domain + SSL hoạt động
+- [ ] Có theo dõi log lỗi runtime
